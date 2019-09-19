@@ -7,111 +7,138 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
     const handleResponse = (xhr) => {
+
+      const type = xhr.getResponseHeader('content-type');
+
       const content = document.querySelector('#content');
 
-      const obj = JSON.parse(xhr.response);
+      if(type === 'application/json'){
+        const obj = JSON.parse(xhr.response);
 
-      switch(xhr.status){
-        case 200:
-          content.innerHTML = '<b>Success</b>';
-          break;
-        case 400:
-          content.innerHTML = '<b> Bad Request </b>';
-          break;
-        case 401:
-          content.innerHTML = '<b>Unauthorized Request</b>'
-          break;
-        case 403:
-        content.innerHTML = '<b>Forbidden Request</b>'
-          break;
-        case 500:
-          content.innerHTML = '<b>Internal Error</b>'
-          break;
-        case 501:
-          content.innerHTML = '<b> Status Code not implemented by client </b>'
-          break;
-        case 404:
-          content.innerHTML = '<b> Resource Not Found </b>';
-          break;
-        default:
-          content.innerHTML = '<b> Status Code not implemented by client </b>';
-          break;
-    }
+        switch(xhr.status){
+          case 200:
+            content.innerHTML = `<b>Success</b>`;
+            break;
+          case 400:
+            content.innerHTML = '<b> Bad Request </b>';
+            break;
+          case 401:
+            content.innerHTML = '<b>Unauthorized Request</b>';
+            break;
+          case 403:
+          content.innerHTML = '<b>Forbidden Request</b>';
+            break;
+          case 500:
+            content.innerHTML = '<b>Internal Error</b>';
+            break;
+          case 501:
+            content.innerHTML = '<b> Status Code not implemented by client </b>';
+            break;
+          case 404:
+            content.innerHTML = '<b> Resource Not Found </b>';
+            break;
+          default:
+            content.innerHTML = '<b> Status Code not implemented by client </b>';
+            break;
+        }
 
-    if(obj.message){
-      content.innerHTML += `<p>${obj.message}</p>`;
-    }
+        if(obj.message){
+          content.innerHTML += `<p>${obj.message}</p>`;
+        }
+      }else if(type === 'text/xml'){
+        console.log(xhr.responseXML);
+        content.innerHTML = `<b> message: ${xhr.responseXML.querySelector('message').textContent}</b>`;
+        if(xhr.responseXML.querySelector('id')){
+          content.innerHTML += `<p> id: ${xhr.responseXML.querySelector('id').textContent}</p>`;
+        }
+      }
+
+      
 
   };
 
 
-  const sendAjax = (url) => {
+  const sendAjax = (url, acceptedType) => {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', url);
-    xhr.setRequestHeader("Accept", 'application/json');
+    xhr.setRequestHeader("Accept", acceptedType);
 
     xhr.onload = () => handleResponse(xhr);
 
     xhr.send();
   };
 
+
+
   const init = () => {
-      // const successButton = document.querySelector("#success");
-      // const badRequestButton = document.querySelector("#badRequest");
-      // const notFoundButton = document.querySelector("#notFound");
-      const sendButton = document.querySelector('#send');
-      const requestValue = document.querySelector('#page');
+    //   // const successButton = document.querySelector("#success");
+    //   // const badRequestButton = document.querySelector("#badRequest");
+    //   // const notFoundButton = document.querySelector("#notFound");
+    //   const sendButton = document.querySelector('#send');
+    //   const requestValue = document.querySelector('#page');
 
-      const success = () => sendAjax('/success');
-      const badRequest = () => sendAjax('/badRequest');
-      const unauthorized = () => sendAjax('/unauthorized');
-      const forbidden = () => sendAjax('/forbidden');
-      const internal = () => sendAjax('/internal');
-      const notImplemented = () => sendAjax('/notImplemented');
-      const notFound = () => sendAjax('/notFound');
+    //   const success = () => sendAjax('/success');
+    //   const badRequest = () => sendAjax('/badRequest');
+    //   const unauthorized = () => sendAjax('/unauthorized');
+    //   const forbidden = () => sendAjax('/forbidden');
+    //   const internal = () => sendAjax('/internal');
+    //   const notImplemented = () => sendAjax('/notImplemented');
+    //   const notFound = () => sendAjax('/notFound');
 
-      let correctFunction = internal;
+    //   let correctFunction = internal;
 
-      const pick = () => {
-        let result = page.options[page.selectedIndex].value;
-        switch(result){
-        case "/success":
-          correctFunction = success;
-          break;
-        case "/badRequest":
-          correctFunction = badRequest;
-          break;
-        case "/unauthorized":
-          correctFunction = unauthorized;
-          break;
-        case "/forbidden":
-          correctFunction = forbidden;
-          break;
-        case "/internal":
-          correctFunction = internal;
-          break;
-        case "/notImplemented":
-          correctFunction = notImplemented;
-          break;
-        case '/notFound':
-          correctFunction = notFound;
-          break;
-        default:
-          correctFunction = badRequest;
-          break;
-      }
+    //   const pick = () => {
+    //     let result = page.options[page.selectedIndex].value;
+    //     switch(result){
+    //     case "/success":
+    //       correctFunction = success;
+    //       break;
+    //     case "/badRequest":
+    //       correctFunction = badRequest;
+    //       break;
+    //     case "/unauthorized":
+    //       correctFunction = unauthorized;
+    //       break;
+    //     case "/forbidden":
+    //       correctFunction = forbidden;
+    //       break;
+    //     case "/internal":
+    //       correctFunction = internal;
+    //       break;
+    //     case "/notImplemented":
+    //       correctFunction = notImplemented;
+    //       break;
+    //     case '/notFound':
+    //       correctFunction = notFound;
+    //       break;
+    //     default:
+    //       correctFunction = badRequest;
+    //       break;
+    //   }
 
-    }
+    // }
      
 
      
       
 
-      // successButton.addEventListener('click', success);
-      // badRequestButton.addEventListener('click', badRequest);
-      // notFoundButton.addEventListener('click', notFound);
-      requestValue.addEventListener('click', pick);
-      sendButton.addEventListener('click', correctFunction);
+    //   // successButton.addEventListener('click', success);
+    //   // badRequestButton.addEventListener('click', badRequest);
+    //   // notFoundButton.addEventListener('click', notFound);
+    //   requestValue.addEventListener('click', pick);
+    //   sendButton.addEventListener('click', correctFunction);
+
+    const sendButton = document.querySelector('#send');
+    
+    const request = () => {
+      const pageSelected = document.querySelector('#page'); 
+      const url = pageSelected.options[pageSelected.selectedIndex].value;
+      const typeSelected = document.querySelector('#type');
+      const type = typeSelected.options[typeSelected.selectedIndex].value;
+      sendAjax(url,type);
+    }
+    
+    sendButton.addEventListener('click', request);
 
     };
     
