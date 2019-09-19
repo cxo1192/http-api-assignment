@@ -70,7 +70,7 @@
       const notImplemented = () => sendAjax('/notImplemented');
       const notFound = () => sendAjax('/notFound');
 
-      let correctFunction = unauthorized;
+      let correctFunction = internal;
 
       const pick = () => {
         let result = page.options[page.selectedIndex].value;
